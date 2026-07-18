@@ -3,8 +3,7 @@ import pandas as pd
 from recommender import build_model, recommend, find_perfume
 
 def load_data(path):
-    data = pd.read_csv(path)
-    return pd.read_csv(file_path)
+    return pd.read_csv(path)
 
 def preview_data(data, n=5):
     print(data.head(n))
