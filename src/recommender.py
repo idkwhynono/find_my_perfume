@@ -7,6 +7,7 @@ from difflib import get_close_matches
 
 def build_model(df):
     vectorizer = TfidfVectorizer()
+    df["notes"] = df["notes"].fillna("")
     matrix = vectorizer.fit_transform(df["notes"])
     similarity = cosine_similarity(matrix)
     return similarity
@@ -17,7 +18,7 @@ def find_perfume(df, user_perfume):
         return user_perfume, "exact"
     
     # Partially matched name
-    matches = df[df["name"].str.contains(user_perfume, case=False)]
+    matches = df[df["name"].str.contains(user_perfume, case=False, na=False)]
 
     if not matches.empty:
         return matches.iloc[0]["name"], "partial"

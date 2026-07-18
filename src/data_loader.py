@@ -2,11 +2,33 @@ import numpy as np
 import pandas as pd
 from recommender import build_model, recommend, find_perfume
 
+
 def load_data(path):
-    return pd.read_csv(path)
+    df = pd.read_csv(path)
+
+    # Remove rows without a perfume name or notes
+    df = df.dropna(subset=["name", "notes"])
+
+    # Make sure both columns are strings
+    df["name"] = df["name"].astype(str)
+    df["notes"] = df["notes"].astype(str)
+
+    df = df.reset_index(drop=True)
+
+    return df
 
 def preview_data(data, n=5):
     print(data.head(n))
+
+def load_data(path):
+
+    df = pd.read_csv(path)
+
+    df = df.dropna(subset=["notes"])
+
+    df = df.reset_index(drop=True)
+
+    return df
 
 
 if __name__ == "__main__":
