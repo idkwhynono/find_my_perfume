@@ -10,8 +10,11 @@ def load_data(path):
     df = df.dropna(subset=["name", "notes"])
 
     # Make sure both columns are strings
-    df["name"] = df["name"].astype(str)
+    df["name"] = df["name"].astype(str).str.strip()
     df["notes"] = df["notes"].astype(str)
+
+    # Remove duplicate perfume names
+    df = df.drop_duplicates(subset=["name"], keep="first")
 
     df = df.reset_index(drop=True)
 
@@ -19,17 +22,6 @@ def load_data(path):
 
 def preview_data(data, n=5):
     print(data.head(n))
-
-def load_data(path):
-
-    df = pd.read_csv(path)
-
-    df = df.dropna(subset=["notes"])
-
-    df = df.reset_index(drop=True)
-
-    return df
-
 
 if __name__ == "__main__":
    file_path = "data/perfumes.csv"
@@ -39,7 +31,7 @@ if __name__ == "__main__":
         df = df.reset_index(drop=True)
         
         # Build the cosine similarity matrix
-        similarity_matrix = build_model(df)
+        vectorizer, similarity_matrix = build_model(df)
         
         while True:
             user_perfume = input("Enter a perfume: ").strip()

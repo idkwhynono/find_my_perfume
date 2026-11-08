@@ -1,9 +1,10 @@
 from PIL import Image
 import streamlit as st
-
 from data_loader import load_data
 from recommender import build_model, find_perfume, recommend
 import base64
+
+
 
 def get_base64(path):
     with open(path, "rb") as file:
@@ -20,35 +21,34 @@ def show_recommendations(df, perfume, similarity_matrix):
         if recommendation["similarity"] > 0
     ]
 
-    
     st.subheader("Recommended Perfumes")
+    
 
     for recommendation in recommendations:
 
-        st.markdown(f"""
-        <div style="
-            background:white;
-            padding:20px;
-            border-radius:18px;
-            margin-bottom:18px;
-            box-shadow:0px 4px 12px rgba(0,0,0,.08);
-            border-left:7px solid #F7B38A;
-        ">
+        card_html = f"""
+        <div style="background-color:#E5EDF0;
+                    padding:12px 16px;
+                    border-radius:3px;
+                    margin-bottom:10px;
+                    border-left:3px solid #78B7B5;">
 
-        <h3 style="color:#D26A8C;">
-            {recommendation['name']}
-        </h3>
+            <div style="font-size:16px; font-weight:700; color:#243B4A;">
+                {recommendation['name']}
+            </div>
 
-        <b>Brand:</b> {recommendation['brand']}<br><br>
+            <div style="font-size:12px; color:#607783;">
+                {recommendation['brand']}
+            </div>
 
-        <b style="color:#9CCFEA;">
-            Similarity:
-            {recommendation['similarity']:.1f}%
-            
-        </b>
+            <div style="font-size:12px; font-weight:600; color:#367E7D; margin-top:6px;">
+                Similarity: {recommendation['similarity']:.2f}%
+            </div>
 
         </div>
-        """, unsafe_allow_html=True)
+        """
+
+        st.html(card_html)
 
         st.progress(recommendation["similarity"] / 100)
 
@@ -108,94 +108,99 @@ st.sidebar.title("🍃 About")
 
 left, center, right = st.columns([1.5,1,1.5])
 
-st.sidebar.info("""
+st.sidebar.markdown("""
+<div style="color:#F2DFA0;">
+
 Find perfumes similar to fragrances you already enjoy.
 
-### Built with
+<h3 style="color:#C9A64B;">Built with</h3>
 
-- Python
-- Streamlit
-- TF-IDF
-- Cosine Similarity
-""")
+<ul>
+<li>Python</li>
+<li>Streamlit</li>
+<li>TF-IDF</li>
+<li>Cosine Similarity</li>
+</ul>
+
+</div>
+""", unsafe_allow_html=True)
 
 # Load data
 df = load_data("data/perfumes.csv")
 df = df.reset_index(drop=True)
 
-similarity_matrix = build_model(df)
+vectorizer, tfidf_matrix = build_model(df)
 
 # CSS
 st.markdown("""
-<style>
+    <style>
+    /* Main background */
+    .stApp,
+    [data-testid="stAppViewContainer"] {
+        background-color: #243B4A !important;
+    }
 
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #1B303D !important;
+        color: #F2DFA0;
+    }
+
+    /* Header */
+    [data-testid="stHeader"] {
+        background-color: #243B4A !important;
+    }
+
+    /* Main title */
+    .title {
+        font-size: 56px;
+        font-weight: 800;
+        text-align: center;
+        color: #C9A64B !important;
+        margin-bottom: 0;
+}
+
+    /* Subtitle */
+    .subtitle {
+        text-align: center;
+        color: #A9BEC8;
+        font-size: 17px;
+    }
+
+    /* Search button */
+    div.stButton > button {
+        background: #78B7B5;
+        color: #1B303D;
+        border: none;
+        border-radius: 5px;
+        font-weight: 700;
+        padding: 12px;
+    }
+
+    div.stButton > button:hover {
+        background: #A0D0CC;
+    }
+            
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 html, body, [class*="css"]{
     font-family:'Poppins',sans-serif;
 }
 
-@keyframes fadeIn{
-    from{
-        opacity:0;
-        transform:translateY(-25px);
-    }
+# Search input
 
-    to{
-        opacity:1;
-        transform:translateY(0px);
-    }
-}
+div[data-baseweb="input"] input {
 
-.title{
-    font-size:60px;
-    font-weight:700;
-    text-align:center;
-    color:#D26A8C;
-    animation:fadeIn 1.2s ease;
-    margin-bottom:0px;
-}
-
-.subtitle{
-    text-align:center;
-    color:#8A7A7A;
-    font-size:18px;
-    margin-bottom:10px;
-}
-
-.bottle{
-    text-align:center;
-    font-size:75px;
-    animation:fadeIn 2s ease;
-    margin-bottom:20px;
-}
-
-div.stButton > button{
-
-    width:100%;
-
-    background:#F7B38A;
-
-    color:white;
-
-    border:none;
-
-    border-radius:15px;
-
-    padding:12px;
-
-    font-size:18px;
-
-    transition:0.3s;
-}
-
-div.stButton > button:hover{
-
-    background:#D97B93;
-
-    transform:scale(1.03);
+    border-radius: 8px;
 
 }
+# Input focus
+
+div[data-baseweb="input"]:focus-within {
+
+    border-color: #426B8A;
+
+}      
 
 </style>
 
@@ -207,7 +212,7 @@ Find your next signature fragrance.
 
 """, unsafe_allow_html=True)
 
-left, center, right = st.columns([1, 2, 1])
+left, center, right = st.columns([0.7, 2.6, 0.7])
 
 with center:
 
@@ -218,9 +223,7 @@ with center:
             placeholder="e.g. Dior Sauvage"
         )
 
-        search = st.form_submit_button("Find Similar")
-
-
+        search = st.form_submit_button("Find Similar Perfumes")
 
 
 if search:
@@ -233,16 +236,36 @@ if search:
 
     elif matched_tag == "exact":
 
-        show_recommendations(df, perfume, similarity_matrix)
+        show_recommendations(df, perfume, tfidf_matrix)
 
     elif matched_tag in ("partial", "fuzzy"):
 
-        st.info(f"🧙🏼 Showing results for **{perfume}**")
+        st.markdown(
+            f"""
+            <div style="
+                color: #F2DFA0;
+                font-size: 16px;
+                font-weight: 600;
+                margin: 12px 0;
+            ">
+                🧙🏼 Showing results for {perfume}
+            </div>
+            """,
+            unsafe_allow_html=True
+)
 
-        show_recommendations(df, perfume, similarity_matrix)
+        show_recommendations(df, perfume, tfidf_matrix)
 
    
+print(df.loc[df["name"] == "Bleu de Chanel All-Over Spray", "notes"].iloc[0])
 
+print(df.loc[df["name"] == "De Blue", "notes"].iloc[0])
+
+print(df.loc[df["name"] == "Cool Blue", "notes"].iloc[0])
+
+print(df.loc[df["name"] == "Indigo Vetiver", "notes"].iloc[0])
+
+print(df.loc[df["name"] == "Dusk", "notes"].iloc[0])
         
 
         
