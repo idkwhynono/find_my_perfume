@@ -4,4 +4,4 @@ A perfume recommendation system that suggests fragrances based on perfumes users
 
 Built with Python.
 
-**Live Demo:** [Find My Perfume]((https://findmyperfume-fqhauxxvbddc4wrzmcd98g.streamlit.app/))
+**Live Demo:** [Find My Perfume](https://findmyperfume-fqhauxxvbddc4wrzmcd98g.streamlit.app/)
