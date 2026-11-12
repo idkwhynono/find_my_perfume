@@ -30,6 +30,12 @@ html, body, [class*= "css"] {
     color: #F2DFA0;
 }
 
+[data-testid="stWidgetLabel"] p,
+[data-testid="stWidgetLabel"] label {
+    color: #F8D7E3 !important;
+    font-weight: 600;
+}
+
 .title {
     font-size: 56px;
     font-weight: 800;
@@ -49,13 +55,13 @@ h1.title,
 }
 .subtitle {
     text-align: center;
-    color: #A9BEC8;
+    color: #A9BEC8 !important;
     font-size: 17px;
 }
 
 div.stButton > button {
     background: #78B7B5;
-    color: #1B303D;
+    color: #1B303D !important;
     border: none;
     border-radius: 5px;
     font-weight: 700;
