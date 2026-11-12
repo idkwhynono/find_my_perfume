@@ -1,91 +1,60 @@
-import numpy as np
 import pandas as pd
-from recommender import build_model, recommend, find_perfume
-
-
+ 
+ 
 def load_data(path):
     df = pd.read_csv(path)
-
-    # Remove rows without a perfume name or notes
-    df = df.dropna(subset=["name", "notes"])
-
-    # Make sure both columns are strings
+ 
+    df = df.dropna(subset=["name", "notes"]).copy()
+ 
     df["name"] = df["name"].astype(str).str.strip()
     df["notes"] = df["notes"].astype(str)
-
-    # Remove duplicate perfume names
+ 
     df = df.drop_duplicates(subset=["name"], keep="first")
-
-    df = df.reset_index(drop=True)
-
-    return df
-
-def preview_data(data, n=5):
-    print(data.head(n))
-
+    return df.reset_index(drop=True)
+ 
+ 
+def print_recommendations(recommendations):
+    print("\nRecommended perfumes:\n")
+    for rec in recommendations:
+        print(f"{rec['name']:<25}{rec['brand']:<15}{rec['similarity']:>6.1f}%")
+    print()
+ 
+ 
+def ask_yes_no(question):
+    while True:
+        answer = input(question + " (Y/N): ").strip().lower()
+        if answer in ("y", "n"):
+            return answer == "y"
+        print("Please only enter Y or N!")
+ 
+ 
+def run_cli(path="data/perfumes.csv"):
+    from recommender import build_model, find_perfume, recommend
+ 
+    df = load_data(path)
+    _, tfidf_matrix = build_model(df)
+ 
+    while True:
+        query = input("Enter a perfume (or 'q' to quit): ").strip()
+        if query.lower() == "q":
+            break
+ 
+        perfume, match_type = find_perfume(df, query)
+ 
+        if perfume is None:
+            print("No similar perfume found.\n")
+            continue
+ 
+        if match_type != "exact" and not ask_yes_no(f"Did you mean '{perfume}'?"):
+            print("Sorry, no matches found.\n")
+            continue
+ 
+        print_recommendations(recommend(df, perfume, tfidf_matrix))
+ 
+ 
 if __name__ == "__main__":
-   file_path = "data/perfumes.csv"
-   
-   try:
-        df = load_data(file_path)
-        df = df.reset_index(drop=True)
-        
-        # Build the cosine similarity matrix
-        vectorizer, similarity_matrix = build_model(df)
-        
-        while True:
-            user_perfume = input("Enter a perfume: ").strip()
-
-            perfume, matched_tag = find_perfume(df, user_perfume)
-
-            if perfume is None:
-                print("No similar perfume found.")
-                
-            elif matched_tag == "exact":
-                recommendations = recommend(df, perfume, similarity_matrix)
-
-                print("\nRecommended perfumes:\n")
-
-                for recom in recommendations:
-                    print(
-                        f"{recom['name']:<25}"
-                        f"{recom['brand']:<15}"
-                        f"{recom['similarity']:>6.1f}%"
-
-                    )
-
-
-            elif matched_tag in ("partial", "fuzzy"):
-                while True:
-                    answer = input(f"Did you mean '{perfume}'?  (Y/N): ").strip().lower()
-                    if answer == "y":
-                        recommendations = recommend(df, perfume, similarity_matrix)
-
-                        print("\nRecommended perfumes:\n")
-
-                        for recom in recommendations:
-                            print(
-                                f"{recom['name']:<25}"
-                                f"{recom['brand']:<15}"
-                                f"{recom['similarity']:>6.1f}%"
-
-                            )
-                        break
-
-                    elif answer == "n":
-                        print("Sorry, no matches found.")
-                        break
-
-                    else:
-                        print("Please only enter Y or N!")
-
-                print()
-            
-            
-        
-        
-   except FileNotFoundError:
-        print("Dataset not found yet. We will add it in next step")
-                   
-
+    try:
+        run_cli()
+    except FileNotFoundError:
+        print("Dataset not found. Check that data/perfumes.csv exists.")
  
